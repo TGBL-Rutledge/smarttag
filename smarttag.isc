@@ -1,0 +1,393 @@
+#ISD afv6
+# Simplicity Studio version: 4.25.1.201801251900-1144
+
+# Application configuration
+stackId: com.silabs.sdk.stack.super
+stackRoot: C:\SiliconLabs\SimplicityStudio\v4\developer\sdks\gecko_sdk_suite\v2.1
+appId: thread
+frameworkRoot: protocol\thread_2.5\app\thread
+architecture: efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc
+exactArchitectureToolchain: com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:4.9.3.20150529
+deviceName: smarttag
+sourceSampleAppId: sensor-actuator
+generationDirectory: PATH(ISC_RELATIVE):.
+
+# Devices
+device: EM3xx
+device: SoC
+device: Router
+device: EFR32
+
+# Plugin configuration
+appPlugin: accelerometer-led=false
+appPlugin: adc=true
+appPlugin: address-configuration-debug=true
+appPlugin: antenna=false
+appPlugin: antenna-stub=true
+appPlugin: ash-v3=false
+appPlugin: ash-v3-stub=false
+appPlugin: basic-server=true
+appPlugin: battery-monitor=false
+appPlugin: bootload-cli=false
+appPlugin: bulb-pwm-driver=false
+appPlugin: bulb-ui=false
+appPlugin: button=true
+appPlugin: button-interface=false
+appPlugin: button-press=true
+appPlugin: button-stub=false
+appPlugin: buzzer=false
+appPlugin: buzzer-stub=false
+appPlugin: cjson=false
+appPlugin: cli=true
+appPlugin: coap-cli=true
+appPlugin: coap-debug=false
+appPlugin: coap-dispatch=true
+appPlugin: coexistence=false
+appPlugin: command-interpreter2=true
+appPlugin: connection-manager-cli=true
+appPlugin: connection-manager-jib=true
+appPlugin: connection-manager-joob=false
+appPlugin: debug-channel=false
+appPlugin: debug-channel-stub=true
+appPlugin: debug-print=true
+appPlugin: dhcp-client=true
+appPlugin: dhcp-library=true
+appPlugin: dhcp-stub-library=false
+appPlugin: diagnostic=false
+appPlugin: diagnostic-stub=true
+appPlugin: dmp-demo-ui=false
+appPlugin: dns-cli=false
+appPlugin: dtls-auth-params=true
+appPlugin: dtls-cli=false
+appPlugin: eeprom=true
+appPlugin: eeprom-powerdown=false
+appPlugin: end-node-ui=false
+appPlugin: ext-device=false
+appPlugin: fem-control=false
+appPlugin: generic-interrupt-control=false
+appPlugin: glib=false
+appPlugin: global-address-prefix-debug=false
+appPlugin: gpio-sensor=false
+appPlugin: groups-server=false
+appPlugin: hal-library=true
+appPlugin: hal-ncp-library=false
+appPlugin: heartbeat=false
+appPlugin: heartbeat-node-type=true
+appPlugin: host-network-management=false
+appPlugin: humidity-si7021-stub=false
+appPlugin: i2c-driver=false
+appPlugin: i2c-driver-stub=false
+appPlugin: icmp-cli=true
+appPlugin: icmp-debug=true
+appPlugin: identify-server=true
+appPlugin: idle-sleep=false
+appPlugin: illuminance-si1141-stub=false
+appPlugin: infrared-led=false
+appPlugin: key-matrix=false
+appPlugin: led=true
+appPlugin: led-blink=false
+appPlugin: led-dim-pwm=false
+appPlugin: led-rgb-pwm=false
+appPlugin: led-stub=false
+appPlugin: led-temp-pwm=false
+appPlugin: level-control-server=false
+appPlugin: libcoap=false
+appPlugin: linked-list=false
+appPlugin: main=true
+appPlugin: mbedtls-custom-library=false
+appPlugin: mbedtls-dotdot-library=false
+appPlugin: mbedtls-library=true
+appPlugin: mfglib-library=false
+appPlugin: mfglib-stub-library=false
+appPlugin: microphone-codec-msadpcm=false
+appPlugin: microphone-imaadpcm=false
+appPlugin: module-lna=false
+appPlugin: mpsi=false
+appPlugin: mpsi-ipc=false
+appPlugin: mpsi-storage=false
+appPlugin: ncp-library=false
+appPlugin: ncp-spi-link=false
+appPlugin: ncp-uart-link=false
+appPlugin: network-management-cli=true
+appPlugin: occupancy-pyd1698=false
+appPlugin: occupancy-pyd1698-stub=false
+appPlugin: occupancy-sensing-server=false
+appPlugin: on-off-server=true
+appPlugin: ota-bootload-client=true
+appPlugin: ota-bootload-client-policy=true
+appPlugin: ota-bootload-core=true
+appPlugin: ota-bootload-server=false
+appPlugin: ota-bootload-server-policy=false
+appPlugin: ota-bootload-storage-cli=true
+appPlugin: ota-bootload-storage-core=true
+appPlugin: ota-bootload-storage-eeprom=true
+appPlugin: ota-bootload-storage-unix=false
+appPlugin: paho.mqtt.c=false
+appPlugin: polling=false
+appPlugin: power-configuration-server=false
+appPlugin: power-meter-cs5463=false
+appPlugin: psstore=false
+appPlugin: rail-library=true
+appPlugin: rail-library-mp=false
+appPlugin: sb1-gesture-sensor=false
+appPlugin: scan-debug=false
+appPlugin: serial=true
+appPlugin: sim-eeprom1=true
+appPlugin: sim-eeprom2=false
+appPlugin: sim-eeprom2-1to2-upgrade=false
+appPlugin: sim-eeprom2-1to2-upgrade-stub=false
+appPlugin: slaac-client=true
+appPlugin: slot-manager=false
+appPlugin: stm32f103ret-library=false
+appPlugin: tamper-switch=false
+appPlugin: temperature-si7053-stub=false
+appPlugin: thread-mbedtls-stack=false
+appPlugin: thread-stack=true
+appPlugin: transport-mqtt=false
+appPlugin: udp-cli=false
+appPlugin: udp-debug=false
+appPlugin: unix-library=false
+appPlugin: version-debug=true
+appPlugin: zcl-core=true
+appPlugin: zcl-core-cli=true
+
+# Setup configurations
+{setupId:additionalFiles
+PATH(ISC_RELATIVE):sensor-actuator-implementation.c
+}
+{setupId:boardHeader
+allowMissingHeader:false
+useHeaderInPlace:false
+EFR32MG12P432F1024GL125+BRD4161A=USE_HARDWARE_CONFIGURATOR,,,
+efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc=USE_HARDWARE_CONFIGURATOR,,,
+}
+{setupId:bookkeeping
+}
+{setupId:bootloader
+EFR32MG1P132F256GM48=null,
+EFR32MG12P432F1024GL125=application,
+}
+{setupId:callbackConfiguration
+emberAfInitCallback:false
+emberAfPluginIdleSleepOkToSleepCallback:false
+emberButtonPressIsr:false
+emberGetGlobalAddressReturn:false
+emberUdpHandler:false
+emberZclGetDefaultReportingConfigurationCallback:false
+emberZclGetDefaultReportableChangeCallback:false
+emberZclNotificationCallback:false
+emberZclNotificationPostAttributeChangeCallback:false
+emberConnectionManagerJibGetJoinKeyCallback:false
+emberConnectionManagerConnectionCompleteCallback:false
+emberConnectionManagerConnectCompleteCallback:false
+emberZclPostAttributeChangeCallback:false
+}
+{setupId:coapDispatch
+POST, device/buzzer, buzzerHandler
+POST, device/reset, netResetHandler
+}
+{setupId:commandLineConfiguration
+on
+}
+{setupId:debugConfiguration
+on
+area name off
+appSerial=1
+}
+{setupId:eventConfiguration
+stateEventControl,stateEventHandler
+updateDisplayEventControl,updateDisplayEventHandler
+ezModeEventControl,ezModeEventHandler
+temperatureReadControl,temperatureMeasurementServerReadEventHandler
+}
+{setupId:genConfig
+}
+{setupId:halOptions
+}
+{setupId:hwConfig
+featureLevel=1
+active=true
+lastHwConfFileUsed=PATH(GEN_RELATIVE):efr32mg13p732f512gm48.hwconf
+}
+{setupId:information
+\{key:description
+Sensor/Actuator Application
+
+Quality: Experimental - Useful for demonstration only.
+
+This ZCL over IP sensor and actuator application.  The application provides LED 0 and buzzer (EM35x-DEV only) control, and reports temperature and button 0 state.  It is intended to be used with the border router reference design to demonstrate device commissioning with the Thread Group Commissioning App and routing between a Thread Network and adjacent IP networks.   Use with kits WSTK (EFR32) and EM35x-DEV (EM358x).  
+
+The application is configured by default to run on EFR32, and uses the Graphics Library plugin to display network information on the LCD screen of the WSTK.  In order to run on EM35x-DEV, the Graphics Library plugin must be disabled.
+
+Refer to documents:
+  QSG102: Thread Border Router Add-On Kit Quick-Start Guide (RD-0004-0201)
+  UG116: Developing Custom Border Router Applications
+  thread-framework-readme: command line interface description and examples
+\}
+}
+{setupId:macros
+}
+{setupId:serial
+useHwConfigurator=true
+}
+{setupId:template
+simeepromSize=8192
+}
+{setupId:token
+}
+{setupId:zclip
+configuredNetwork:type:ZIGBEE_PRO, name:Primary
+beginEndpointType:Primary
+device:zcustom
+overrideClientCluster:0,no
+overrideClientCluster:1,no
+overrideClientCluster:2,no
+overrideClientCluster:3,yes
+overrideClientCluster:4,no
+overrideClientCluster:5,no
+overrideClientCluster:6,yes
+overrideClientCluster:7,no
+overrideClientCluster:8,no
+overrideClientCluster:9,no
+overrideClientCluster:10,no
+overrideClientCluster:11,no
+overrideClientCluster:15,no
+overrideClientCluster:21,no
+overrideClientCluster:22,no
+overrideClientCluster:25,yes
+overrideClientCluster:26,no
+overrideClientCluster:27,no
+overrideClientCluster:32,no
+overrideClientCluster:33,no
+overrideClientCluster:37,no
+overrideClientCluster:256,no
+overrideClientCluster:257,no
+overrideClientCluster:258,no
+overrideClientCluster:512,no
+overrideClientCluster:513,no
+overrideClientCluster:514,no
+overrideClientCluster:515,no
+overrideClientCluster:516,no
+overrideClientCluster:768,no
+overrideClientCluster:769,no
+overrideClientCluster:1024,no
+overrideClientCluster:1025,no
+overrideClientCluster:1026,no
+overrideClientCluster:1027,no
+overrideClientCluster:1028,no
+overrideClientCluster:1029,no
+overrideClientCluster:1030,no
+overrideClientCluster:1280,no
+overrideClientCluster:1281,no
+overrideClientCluster:1282,no
+overrideClientCluster:1536,no
+overrideClientCluster:1537,no
+overrideClientCluster:1556,no
+overrideClientCluster:1557,no
+overrideClientCluster:1792,no
+overrideClientCluster:1793,no
+overrideClientCluster:1794,no
+overrideClientCluster:1795,no
+overrideClientCluster:1796,no
+overrideClientCluster:1797,no
+overrideClientCluster:1798,no
+overrideClientCluster:1799,no
+overrideClientCluster:1800,no
+overrideClientCluster:1801,no
+overrideClientCluster:1802,no
+overrideClientCluster:2048,no
+overrideClientCluster:2304,no
+overrideClientCluster:2305,no
+overrideClientCluster:2306,no
+overrideClientCluster:2307,no
+overrideClientCluster:2308,no
+overrideClientCluster:2309,no
+overrideClientCluster:2561,no
+overrideClientCluster:2562,no
+overrideClientCluster:2816,no
+overrideClientCluster:2817,no
+overrideClientCluster:2818,no
+overrideClientCluster:2819,no
+overrideClientCluster:2820,no
+overrideClientCluster:2821,no
+overrideClientCluster:4096,no
+overrideServerCluster:0,yes
+overrideServerCluster:1,no
+overrideServerCluster:2,no
+overrideServerCluster:3,yes
+overrideServerCluster:4,no
+overrideServerCluster:5,no
+overrideServerCluster:6,yes
+overrideServerCluster:7,no
+overrideServerCluster:8,no
+overrideServerCluster:9,no
+overrideServerCluster:10,no
+overrideServerCluster:11,no
+overrideServerCluster:15,no
+overrideServerCluster:21,no
+overrideServerCluster:22,no
+overrideServerCluster:25,no
+overrideServerCluster:26,no
+overrideServerCluster:27,no
+overrideServerCluster:32,no
+overrideServerCluster:33,no
+overrideServerCluster:37,no
+overrideServerCluster:256,no
+overrideServerCluster:257,no
+overrideServerCluster:258,no
+overrideServerCluster:512,no
+overrideServerCluster:513,no
+overrideServerCluster:514,no
+overrideServerCluster:515,no
+overrideServerCluster:516,no
+overrideServerCluster:768,no
+overrideServerCluster:769,no
+overrideServerCluster:1024,no
+overrideServerCluster:1025,no
+overrideServerCluster:1026,yes
+overrideServerCluster:1027,no
+overrideServerCluster:1028,no
+overrideServerCluster:1029,no
+overrideServerCluster:1030,no
+overrideServerCluster:1280,no
+overrideServerCluster:1281,no
+overrideServerCluster:1282,no
+overrideServerCluster:1536,no
+overrideServerCluster:1537,no
+overrideServerCluster:1556,no
+overrideServerCluster:1557,no
+overrideServerCluster:1792,no
+overrideServerCluster:1793,no
+overrideServerCluster:1794,no
+overrideServerCluster:1795,no
+overrideServerCluster:1796,no
+overrideServerCluster:1797,no
+overrideServerCluster:1798,no
+overrideServerCluster:1799,no
+overrideServerCluster:1800,no
+overrideServerCluster:1801,no
+overrideServerCluster:1802,no
+overrideServerCluster:2048,no
+overrideServerCluster:2304,no
+overrideServerCluster:2305,no
+overrideServerCluster:2306,no
+overrideServerCluster:2307,no
+overrideServerCluster:2308,no
+overrideServerCluster:2309,no
+overrideServerCluster:2561,no
+overrideServerCluster:2562,no
+overrideServerCluster:2816,no
+overrideServerCluster:2817,no
+overrideServerCluster:2818,no
+overrideServerCluster:2819,no
+overrideServerCluster:2820,no
+overrideServerCluster:2821,no
+overrideServerCluster:4096,no
+endEndpointType
+configuredEndpoint:*ep:1,pi: 260,di:0,dv:0,ept:Primary,nwk:Primary
+}
+
+# Plugin options
+pluginOption(efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc): EMBER_AF_PLUGIN_OTA_BOOTLOAD_CLIENT_POLICY_CURRENT_IMAGE_TYPE,0xABCD
+pluginOption(efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc): EMBER_AF_PLUGIN_OTA_BOOTLOAD_CLIENT_POLICY_CURRENT_IMAGE_VERSION,0x00010001
+pluginOption(efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc): EMBER_AF_PLUGIN_OTA_BOOTLOAD_CLIENT_POLICY_CURRENT_IMAGE_MANUFACTURER_CODE,0xDEAD
