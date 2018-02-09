@@ -8,7 +8,7 @@ appId: thread
 frameworkRoot: protocol\thread_2.5\app\thread
 architecture: efr32~family[M]~series[1]~device_configuration[3]~performance[P]~radio[732]~flash[512K]~temp[G]~package[M]~pins[48]+BRD4168A+gcc
 exactArchitectureToolchain: com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:4.9.3.20150529
-deviceName: smarttag
+deviceName: smartbadge
 sourceSampleAppId: sensor-actuator
 generationDirectory: PATH(ISC_RELATIVE):.
 
@@ -31,9 +31,9 @@ appPlugin: battery-monitor=false
 appPlugin: bootload-cli=false
 appPlugin: bulb-pwm-driver=false
 appPlugin: bulb-ui=false
-appPlugin: button=true
+appPlugin: button=false
 appPlugin: button-interface=false
-appPlugin: button-press=true
+appPlugin: button-press=false
 appPlugin: button-stub=false
 appPlugin: buzzer=false
 appPlugin: buzzer-stub=false
@@ -72,7 +72,7 @@ appPlugin: groups-server=false
 appPlugin: hal-library=true
 appPlugin: hal-ncp-library=false
 appPlugin: heartbeat=false
-appPlugin: heartbeat-node-type=true
+appPlugin: heartbeat-node-type=false
 appPlugin: host-network-management=false
 appPlugin: humidity-si7021-stub=false
 appPlugin: i2c-driver=false
@@ -80,11 +80,11 @@ appPlugin: i2c-driver-stub=false
 appPlugin: icmp-cli=true
 appPlugin: icmp-debug=true
 appPlugin: identify-server=true
-appPlugin: idle-sleep=false
+appPlugin: idle-sleep=true
 appPlugin: illuminance-si1141-stub=false
 appPlugin: infrared-led=false
 appPlugin: key-matrix=false
-appPlugin: led=true
+appPlugin: led=false
 appPlugin: led-blink=false
 appPlugin: led-dim-pwm=false
 appPlugin: led-rgb-pwm=false
@@ -130,7 +130,7 @@ appPlugin: psstore=false
 appPlugin: rail-library=true
 appPlugin: rail-library-mp=false
 appPlugin: sb1-gesture-sensor=false
-appPlugin: scan-debug=false
+appPlugin: scan-debug=true
 appPlugin: serial=true
 appPlugin: sim-eeprom1=true
 appPlugin: sim-eeprom2=false

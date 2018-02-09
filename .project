@@ -28,7 +28,7 @@
 		<link>
 			<name>efr32mg13p732f512gm48.hwconf</name>
 			<type>1</type>
-			<location>C:/Users/Terrence goh/SimplicityStudio/v4_workspace/sensor-actuator_2/efr32mg13p732f512gm48.hwconf</location>
+			<location>C:/Users/Terrence goh/SimplicityStudio/v4_workspace/smarttag/efr32mg13p732f512gm48.hwconf</location>
 		</link>
 		<link>
 			<name>address-configuration-debug/address-configuration-debug.c</name>
@@ -44,11 +44,6 @@
 			<name>basic-server/basic-server.c</name>
 			<type>1</type>
 			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/zcl/basic-server/basic-server.c</locationURI>
-		</link>
-		<link>
-			<name>button-press/button-press.c</name>
-			<type>1</type>
-			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/button-press/button-press.c</locationURI>
 		</link>
 		<link>
 			<name>cli/cli.c</name>
@@ -351,24 +346,9 @@
 			<locationURI>STUDIO_SDK_LOC/hardware/kit/common/drivers/udelay.c</locationURI>
 		</link>
 		<link>
-			<name>main/main.c</name>
-			<type>1</type>
-			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/main/main.c</locationURI>
-		</link>
-		<link>
-			<name>network-management-cli/network-management-cli.c</name>
-			<type>1</type>
-			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/network-management-cli/network-management-cli.c</locationURI>
-		</link>
-		<link>
 			<name>on-off-server/on-off-server.c</name>
 			<type>1</type>
 			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/zcl/on-off-server/on-off-server.c</locationURI>
-		</link>
-		<link>
-			<name>ota-bootload-client/ota-bootload-client.c</name>
-			<type>1</type>
-			<locationURI>STUDIO_SDK_LOC/protocol/thread_2.5/app/thread/plugin/zcl/ota-bootload-client/ota-bootload-client.c</locationURI>
 		</link>
 		<link>
 			<name>ota-bootload-client-policy/ota-bootload-client-policy.c</name>
