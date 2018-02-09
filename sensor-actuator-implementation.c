@@ -335,7 +335,6 @@ void emberAfInitCallback(void)
 
   // Start the ReadEvent, which will re-activate itself perpetually
   emberEventControlSetActive(temperatureReadControl);
-  emberEventControlSetActive(updateDisplayEventControl);
 
 #if defined(EMBER_AF_PLUGIN_GLIB) && defined(CORTEXM3_EFM32_MICRO)
   // If it is present, initialize the graphics display
@@ -1108,15 +1107,6 @@ static char* nodeTypeToString(EmberNodeType nodeType)
 void updateDisplayEventHandler(void)
 {
   emberEventControlSetInactive(updateDisplayEventControl);
-#if true
-
-  emberAfCorePrintln("Testing ABCDEFGHIJKLMNOPQRSTX");
-
-  emberEventControlSetDelayMS(updateDisplayEventControl, REPORT_PERIOD_MS);
-
-
-#endif
-
 
 #if defined(EMBER_AF_PLUGIN_GLIB) && defined(CORTEXM3_EFM32_MICRO)
   EmberNetworkStatus networkStatus;
