@@ -97,20 +97,6 @@ int MAIN(MAIN_FUNCTION_PARAMETERS)
 
   // Initialize the HAL and enable interrupts.
   halInit();
-#ifdef SWO_ENABLED
-  setupSWOForPrint();
-  ITM_SendChar('H');
-  ITM_SendChar('e');
-  ITM_SendChar('l');
-  ITM_SendChar('l');
-  ITM_SendChar('o');
-  ITM_SendChar(' ');
-  ITM_SendChar('S');
-  ITM_SendChar('W');
-  ITM_SendChar('D');
-  ITM_SendChar('\r');
-  ITM_SendChar('\n');
-#endif
   INTERRUPTS_ON();
 
   // Initialize the EEPROM.
