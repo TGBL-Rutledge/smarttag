@@ -6,11 +6,9 @@
 #ifndef SILABS_THREAD_CONFIG
 #define SILABS_THREAD_CONFIG
 
-
-
-
 // Top level macros
-#define EMBER_AF_DEVICE_NAME "sensor-actuator_2"
+#define EMBER_AF_DEVICE_NAME "smartbadge"
+
 
 
 // Generated setup headers that are included automatically
@@ -30,14 +28,6 @@
 
 // Use this macro to check if Basic Server plugin is included
 #define EMBER_AF_PLUGIN_BASIC_SERVER
-
-// Use this macro to check if Button plugin is included
-#define EMBER_AF_PLUGIN_BUTTON
-
-// Use this macro to check if Button-Press plugin is included
-#define EMBER_AF_PLUGIN_BUTTON_PRESS
-// User options for plugin Button-Press
-#define EMBER_AF_PLUGIN_BUTTON_PRESS_TIMEOUT_MS 500
 
 // Use this macro to check if CLI plugin is included
 #define EMBER_AF_PLUGIN_CLI
@@ -91,9 +81,6 @@
 // Use this macro to check if HAL Library plugin is included
 #define EMBER_AF_PLUGIN_HAL_LIBRARY
 
-// Use this macro to check if Heartbeat (Node Type) plugin is included
-#define EMBER_AF_PLUGIN_HEARTBEAT_NODE_TYPE
-
 // Use this macro to check if ICMP CLI plugin is included
 #define EMBER_AF_PLUGIN_ICMP_CLI
 
@@ -103,8 +90,10 @@
 // Use this macro to check if Identify Server plugin is included
 #define EMBER_AF_PLUGIN_IDENTIFY_SERVER
 
-// Use this macro to check if LED plugin is included
-#define EMBER_AF_PLUGIN_LED
+// Use this macro to check if Idle/Sleep plugin is included
+#define EMBER_AF_PLUGIN_IDLE_SLEEP
+// User options for plugin Idle/Sleep
+#define EMBER_AF_PLUGIN_IDLE_SLEEP_MINIMUM_SLEEP_DURATION_MS 5
 
 // Use this macro to check if Main plugin is included
 #define EMBER_AF_PLUGIN_MAIN
@@ -163,6 +152,9 @@
 // Use this macro to check if RAIL Library plugin is included
 #define EMBER_AF_PLUGIN_RAIL_LIBRARY
 
+// Use this macro to check if Scan Debug plugin is included
+#define EMBER_AF_PLUGIN_SCAN_DEBUG
+
 // Use this macro to check if Serial plugin is included
 #define EMBER_AF_PLUGIN_SERIAL
 
@@ -201,12 +193,6 @@
 
 // API antenna from Antenna Stub plugin
 #define EMBER_AF_API_ANTENNA "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/platform/base/hal/plugin/antenna/antenna.h"
-
-// API button from Button plugin
-#define EMBER_AF_API_BUTTON "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/platform/base/hal/micro/button.h"
-
-// API button-press from Button-Press plugin
-#define EMBER_AF_API_BUTTON_PRESS "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/protocol/thread_2.5/app/thread/plugin/button-press/button-press.h"
 
 // API coap-dispatch from CoAP Dispatch plugin
 #define EMBER_AF_API_COAP_DISPATCH "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/protocol/thread_2.5/app/thread/plugin/coap-dispatch/coap-dispatch.h"
@@ -252,9 +238,6 @@
 
 // API token from HAL Library plugin
 #define EMBER_AF_API_TOKEN "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/platform/base/hal/micro/token.h"
-
-// API led from LED plugin
-#define EMBER_AF_API_LED "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/platform/base/hal/micro/led.h"
 
 // API zcl-ota-bootload-client from OTA Bootload Client plugin
 #define EMBER_AF_API_ZCL_OTA_BOOTLOAD_CLIENT "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/protocol/thread_2.5/app/thread/plugin/zcl/ota-bootload-client/ota-bootload-client.h"
@@ -322,7 +305,6 @@
 // API zcl-core-well-known from ZCL Core plugin
 #define EMBER_AF_API_ZCL_CORE_WELL_KNOWN "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/protocol/thread_2.5/app/thread/plugin/zcl/zcl-core/zcl-core-well-known.h"
 
-#define INCLUDE_RTCDRIVER "../../../../../SiliconLabs/SimplicityStudio/v4/developer/sdks/gecko_sdk_suite/v2.1/platform/emdrv/rtcdrv/config/rtcdrv_config.h" //tgbl
 
 // Coap Dispatch macros
 #ifdef EMBER_AF_COAP_DISPATCH_MAX_URI_PATH_LENGTH
@@ -446,7 +428,5 @@
 #undef EMBER_AF_BOARD_TYPE
 #endif
 #define EMBER_AF_BOARD_TYPE BRD4168A
-
-
 
 #endif // SILABS_THREAD_CONFIG

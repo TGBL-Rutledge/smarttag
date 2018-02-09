@@ -9,6 +9,7 @@
 #include EMBER_AF_API_EMBER_TYPES
 #include EMBER_AF_API_COMMAND_INTERPRETER2
 
+void announceCommand(void);
 void coapDeleteCommand(void);
 void coapGetCommand(void);
 void coapListenCommand(void);
@@ -265,6 +266,7 @@ static EmberCommandEntry emberCommandZclTable[] = {
   emberCommandEntryTerminator(),
 };
 EmberCommandEntry emberCommandTable[] = {
+  emberCommandEntryAction("announce", announceCommand, "", ""),
   emberCommandEntrySubMenu("coap", emberCommandCoapTable, ""),
   emberCommandEntrySubMenu("connection-manager", emberCommandConnectionManagerTable, ""),
   emberCommandEntrySubMenu("eeprom", emberCommandEepromTable, ""),

@@ -12,6 +12,14 @@
 #include EMBER_AF_API_STACK
 #include EMBER_AF_API_ZCL_CORE
 
+bool emberAfOkToSleep(uint32_t durationMs);
+
+void emberAfPluginIdleSleepWakeUp(uint32_t durationMs);
+
+bool emberAfOkToIdle(uint32_t durationMs);
+
+void emberAfPluginIdleSleepActive(uint32_t durationMs);
+
 void emAfMain(MAIN_FUNCTION_PARAMETERS);
 
 void emAfInit(void);

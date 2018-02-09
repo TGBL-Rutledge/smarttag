@@ -4,7 +4,6 @@
 
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
-#include EMBER_AF_API_BUTTON_PRESS
 #include EMBER_AF_API_CONNECTION_MANAGER_JIB
 #include EMBER_AF_API_CONNECTION_MANAGER
 #include EMBER_AF_API_STACK
@@ -53,6 +52,43 @@ void emberZclIdentifyServerStartIdentifyingCallback(EmberZclEndpointId_t endpoin
  * This function is called when the device should stop identifying.
  */
 void emberZclIdentifyServerStopIdentifyingCallback(EmberZclEndpointId_t endpointId)
+{
+}
+
+
+/** @brief Wake Up
+ *
+ * This function is called by the Idle/Sleep plugin after sleeping.
+ *
+ * @param durationMs The duration in milliseconds that the device slept.
+ */
+void emberAfPluginIdleSleepWakeUpCallback(uint32_t durationMs)
+{
+}
+
+
+/** @brief Ok To Idle
+ *
+ * This function is called by the Idle/Sleep plugin before idling.  It is called
+ * with interrupts disabled.  The application should return true if the device
+ * may idle or false otherwise.
+ *
+ * @param durationMs The maximum duration in milliseconds that the device will
+ * idle.
+ */
+bool emberAfPluginIdleSleepOkToIdleCallback(uint32_t durationMs)
+{
+  return true;
+}
+
+
+/** @brief Active
+ *
+ * This function is called by the Idle/Sleep plugin after idling.
+ *
+ * @param durationMs The duration in milliseconds that the device idled.
+ */
+void emberAfPluginIdleSleepActiveCallback(uint32_t durationMs)
 {
 }
 
@@ -301,13 +337,6 @@ void emberDiagnosticAnswerHandler(EmberStatus status,
 }
 
 
-
-/** @brief  Reports an incoming beacon during an active scan. */
-void emberActiveScanHandler(const EmberMacBeaconData *beaconData)
-{
-}
-
-
 /** @brief Return call for emberBecomeCommissioner().  The status is
  * EMBER_SUCCESS if a petition was sent or EMBER_ERR_FATAL if some
  * temporary resource shortage prevented doing so.
@@ -369,9 +398,6 @@ void emberSetJoinKeyReturn(EmberStatus status)
  */
 void emberCommissionNetworkReturn(EmberStatus status)
 {
-
-	emberAfAppPrintln("commission result: 0x%X", status); //tgbl
-
 }
 
 
@@ -492,17 +518,6 @@ void emberDeepSleepCompleteHandler(uint16_t sleepDuration)
 
 /** @brief Provides the result of a call to emberDeepSleep(). */
 void emberDeepSleepReturn(EmberStatus status)
-{
-}
-
-
-/** @brief  Reports the maximum RSSI value measured on the channel.
- *
- * @param channel  The 802.15.4 channel on which the RSSI value was measured.
- *
- * @param maxRssiValue  The maximum RSSI value measured (in units of dBm).
- */
-void emberEnergyScanHandler(uint8_t channel, int8_t maxRssiValue)
 {
 }
 
@@ -719,6 +734,42 @@ void emberGetRadioPowerReturn(int8_t power)
 /** @brief Provides the result of a call to emberGetRipEntry(). */
 void emberGetRipEntryReturn(uint8_t index, const EmberRipEntry *entry)
 {
+	emberAfCorePrintln("short id: %d", index);
+/*
+
+   uint8_t longId[8];
+  EmberNodeType type;
+  int8_t rollingRssi;
+  uint8_t nextHopIndex;
+  uint8_t ripMetric;
+  uint8_t incomingLinkQuality;
+  uint8_t outgoingLinkQuality;
+  bool mleSync;
+  uint8_t age;
+  uint8_t routeDelta;
+
+ */
+
+	  emberAfCorePrintln("******emberGetRipEntryReturn*****START");
+	  emberAfCorePrint("long id: ");
+	  emberAfCoreDebugExec(emberAfPrintExtendedPanId(entry->longId));
+	  emberAfCorePrintln("");
+
+	  emberAfCorePrint("long id: ");
+	  emberAfCoreDebugExec(emberAfPrintBigEndianEui64((const EmberEui64 *)entry->longId));
+	  emberAfCorePrintln("");
+	  emberAfCorePrintln("EmberNodeType: %d ", entry->type);
+
+	  emberAfCorePrintln("rollingRssi: %d dBm", entry->rollingRssi);
+	  emberAfCorePrintln("nextHopIndex: %u", entry->nextHopIndex);
+	  emberAfCorePrintln("ripMetric: %u", entry->ripMetric);
+	  emberAfCorePrintln("incomingLinkQuality: %u", entry->incomingLinkQuality);
+	  emberAfCorePrintln("outgoingLinkQuality: %u", entry->outgoingLinkQuality);
+	  emberAfCorePrintln("mleSync: %d boolean", entry->mleSync);
+	  emberAfCorePrintln("age: %u", entry->age);
+	  emberAfCorePrintln("routeDelta: %u", entry->routeDelta);
+	  emberAfCorePrintln("******emberGetRipEntryReturn*****END");
+	  emberAfCorePrintln("");
 }
 
 
@@ -959,12 +1010,6 @@ void emberRadioGetRandomNumbersReturn(EmberStatus status,
  * Provides the result of a call to emberResignGlobalAddress().
  */
 void emberResignGlobalAddressReturn(EmberStatus status)
-{
-}
-
-
-/** @brief  Provides the status upon completion of a scan. */
-void emberScanReturn(EmberStatus status)
 {
 }
 

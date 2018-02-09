@@ -1,17 +1,18 @@
 // Copyright 2016 Silicon Laboratories, Inc.
 
+// -----------------------------------------------------------------------------
+// Includes
+
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include EMBER_AF_API_STACK
 #include EMBER_AF_API_HAL
-#include EMBER_AF_API_BUTTON_PRESS
 #include EMBER_AF_API_COMMAND_INTERPRETER2
 #include EMBER_AF_API_NETWORK_MANAGEMENT
 #include EMBER_AF_API_CONNECTION_MANAGER
 #ifdef EMBER_AF_API_DEBUG_PRINT
   #include EMBER_AF_API_DEBUG_PRINT
 #endif
-#include EMBER_AF_API_CONNECTION_MANAGER
 #include EMBER_AF_API_ZCL_CORE
 
 #if defined(CORTEXM3_EFM32_MICRO)
@@ -27,11 +28,11 @@
 #include "app/thread/plugin/udp-debug/udp-debug.c"
 #include "plugin/serial/serial.h"
 #include <stdio.h>
-#include "hal/micro/led.h"  //tgbl
+#include "rutledge-epaper-module/Display_EPD_W21.h"
+#include "rutledge-common.h"
 
-// This represents how many times the device will attempt to join until it
-// stops scanning and waits for another button press to trigger a join
-#define SENSOR_ACTUATOR_JOIN_ATTEMPTS 2
+// -----------------------------------------------------------------------------
+// Definitions
 
 // LCD UI macros
 #define EUI_ROW 5
@@ -59,9 +60,16 @@
 #define IP_JSON_KEY "\"ip\":\""
 #define PORT_JSON_KEY "\"port\":"
 
+// -----------------------------------------------------------------------------
+// Private functions
+
+static void announceToAddress(const EmberIpv6Address *newBorderRouter);
+static void finishAnnounceToAddress(void);
 static void sensorActuatorIdleState(void);
 
 static uint32_t readTemperature(void);
+//vlad
+static void startScanAir(void);
 
 // These functions will be used when the WSTK is used as the platform to
 // populate the LCD with useful information
@@ -75,19 +83,67 @@ static void lcdPrintIpv6Address(const EmberIpv6Address *address,
 static void lcdPrintCurrentDeviceState(void);
 #endif //EMBER_AF_PLUGIN_GLIB
 
-static uint8_t joinKey[EMBER_JOIN_KEY_MAX_SIZE + 1] = { 0 };
+static void startReportingTemperature(const EmberIpv6Address *newSubscriberAddress,
+                                      const uint16_t newSubscriberPort);
+static void stopReportingTemperature(void);
+static void reportTemperatureStatusHandler(EmberCoapStatus status,
+                                           EmberCoapCode code,
+                                           EmberCoapReadOptions *options,
+                                           uint8_t *payload,
+                                           uint16_t payloadLength,
+                                           EmberCoapResponseInfo *info);
 
+// -----------------------------------------------------------------------------
+// Externals
+extern void OTAGetGlobalAddressCallback(const EmberIpv6Address *address,
+                                 uint32_t preferredLifetime,
+                                 uint32_t validLifetime,
+                                 uint8_t addressFlags);
+extern EmberEventControl emZclOtaBootloadClientEventControl;
+
+// -----------------------------------------------------------------------------
+// Globals
+
+uint8_t scanCounter=0;
+RutledgeScanData top3Data[3] = { 0 };
+RutledgeScanData scanData[MAX_SCANNING_DEVICES] = { 0 };
+static EmberIpv6Address globalAddress;
+static uint8_t globalAddressString[EMBER_IPV6_ADDRESS_STRING_SIZE] = { 0 };
+static EmberIpv6Address discoverRequestAddress = { { 0 } };
+static EmberIpv6Address subscriberAddress = { { 0 } };
+static uint16_t subscriberPort = EMBER_COAP_PORT;
+static uint8_t joinKey[EMBER_JOIN_KEY_MAX_SIZE + 1] = { 0 };
+static uint8_t joinKeyLength = 0;
+
+static const EmberIpv6Address allMeshRouters = {
+  { 0xFF, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, }
+};
+
+static uint8_t failedReports;
+#define REPORT_FAILURE_LIMIT 3
 #define WAIT_PERIOD_MS   (60 * MILLISECOND_TICKS_PER_SECOND)
-#define REPORT_PERIOD_S (10)
+#define REPORT_PERIOD_S (5)
 #define REPORT_PERIOD_MS (REPORT_PERIOD_S * MILLISECOND_TICKS_PER_SECOND)
 
 static void findOnOffServer(void);
 bool haveOnOffServer = false;
 static EmberZclDestination_t zclLight;
 
+static const uint8_t deviceAnnounceUri[] = "device/announce";
+static const uint8_t temperatureUri[] = "device/temperature";
+
 enum {
-  INITIAL            = 0,
-  IDLE               = 1,
+  INITIAL                              = 0,
+  RESUME_NETWORK                       = 1,
+  JOIN_NETWORK                         = 2,
+  JOIN_NETWORK_COMPLETION              = 3,
+  WAIT_FOR_SUBSCRIPTIONS               = 4,
+  REPORT_TEMP_TO_SUBSCRIBER            = 5,
+  WAIT_FOR_DATA_CONFIRMATION           = 6,
+  JOINED_TO_NETWORK                    = 7,
+  RESET_NETWORK_STATE                  = 8,
+  IDLE                                 = 9,
 };
 
 static uint8_t state = INITIAL;
@@ -105,9 +161,11 @@ static void setNextStateWithDelay(uint8_t nextState, uint32_t delayMs);
 // Keep our EUI string for JSON payloads, take size in bytes x2 to account for
 // ASCII and add 1 for a NULL terminator
 static uint8_t euiString[EUI64_SIZE * 2 + 1] = { 0 };
+static uint8_t exiString[EUI64_SIZE * 2 + 1] = { 0 };
 
 // String helper function prototypes
 static void formatEuiString(uint8_t* euiString, size_t strSz, const uint8_t* euiBytes);
+static const uint8_t *printableNetworkId(void);
 
 #if defined(CORTEXM3_EFM32_MICRO)
 static void adcSetup(void);
@@ -256,7 +314,7 @@ void emberAfInitCallback(void)
   adcSetup();
 
   // Set Led to on by default
-  halSetLed(BOARD_ACTIVITY_LED);
+  //halSetLed(BOARD_ACTIVITY_LED);
 
   // Taken from 7021 specification sheet
   uint16_t maxTempDeciC = (125 * 100);
@@ -277,6 +335,7 @@ void emberAfInitCallback(void)
 
   // Start the ReadEvent, which will re-activate itself perpetually
   emberEventControlSetActive(temperatureReadControl);
+  emberEventControlSetActive(updateDisplayEventControl);
 
 #if defined(EMBER_AF_PLUGIN_GLIB) && defined(CORTEXM3_EFM32_MICRO)
   // If it is present, initialize the graphics display
@@ -384,9 +443,225 @@ void emberZclPostAttributeChangeCallback(EmberZclEndpointId_t endpointId,
       && attributeId == EMBER_ZCL_CLUSTER_ON_OFF_SERVER_ATTRIBUTE_ON_OFF) {
     bool on = *((bool*)buffer);
     emberAfCorePrintln("Switching LED %s", (on ? "on." : "off."));
-    (on ? halSetLed : halClearLed)(BOARD_ACTIVITY_LED);
+   // (on ? halSetLed : halClearLed)(BOARD_ACTIVITY_LED);
   }
 }
+
+void borderRouterDiscoveryHandler(EmberCoapCode code,
+                                  uint8_t *uri,
+                                  EmberCoapReadOptions *options,
+                                  const uint8_t *payload,
+                                  uint16_t payloadLength,
+                                  const EmberCoapRequestInfo *info)
+{
+  // Announce to the remote address trying to discover
+  announceToAddress(&info->remoteAddress);
+}
+
+// announce
+void announceCommand(void)
+{
+  // We can force an announce to all mesh routers with an announce command
+  announceToAddress(&allMeshRouters);
+}
+
+static void announceToAddress(const EmberIpv6Address *address)
+{
+  // We announce to the requested address in response to a discovery (or a CLI
+  // command).
+  MEMCOPY(&discoverRequestAddress, address, sizeof(EmberIpv6Address));
+
+  emberAfCorePrint("Announcing to address to: ");
+  emberAfCoreDebugExec(emberAfPrintIpv6Address(&discoverRequestAddress));
+  emberAfCorePrintln("");
+
+  // Get the global address to return to the border router when attaching
+  emberGetGlobalAddresses(NULL, 0); // all prefixes
+
+  // The announcement will finish once the global address is returned
+}
+
+//callback is also used by sensor-actuator-implementation.c,so determine the current event and share code
+void emberGetGlobalAddressReturn(const EmberIpv6Address *address,
+                                 uint32_t preferredLifetime,
+                                 uint32_t validLifetime,
+                                 uint8_t addressFlags)
+{
+  if(emberEventControlGetActive(emZclOtaBootloadClientEventControl) == TRUE)
+  {
+      OTAGetGlobalAddressCallback(address, preferredLifetime, validLifetime, addressFlags);
+  }
+  else
+  {
+      if (emberIsIpv6UnspecifiedAddress(address)) {
+        return;
+      }
+
+      MEMCOPY(&globalAddress, address, sizeof(EmberIpv6Address));
+      emberIpv6AddressToString(&globalAddress,
+                               globalAddressString,
+                               sizeof(globalAddressString));
+      emberAfCorePrintln("Global address assigned %s", globalAddressString);
+      finishAnnounceToAddress();
+
+      emberEventControlSetInactive(updateDisplayEventControl);
+  }
+}
+
+static void finishAnnounceToAddress(void)
+{
+  EmberStatus status;
+
+  // If we returned and got an IP address, return it otherwise just return
+  // the EUI and device type
+  // Send this CoAP response to the border router when it tries to discover:
+  //     {
+  //        "ip":"aaaa:0000:0000:0000:1234:1234:1234:1234",
+  //        "eui64":"1234123412341234",
+  //        "type":"sensor-actuator-node"
+  //     }
+
+  // NULL JSON that is a sensor-actuator-node
+
+  char jsonString[140] =
+    "{\"ip\":\"0000:0000:0000:0000:0000:0000:0000:0000\",\"eui64\":\"0000000000000000\",\"macExtID\":\"0000000000000000\",\"type\":\"rutledge\"}\0";
+  uint8_t strSz = strlen("{\"ip\":\"");
+  char euiKey[] = "\",\"eui64\":\"";
+  char maxExtIDKey[] = "\",\"macExtID\":\"";
+  char jsonClose[] = "\",\"type\":\"rutledge\"}";
+
+  // If we got a global address put it in the JSON
+  strncpy(jsonString + strSz, (char const*)globalAddressString, sizeof(jsonString) - strSz);
+  strSz += strlen((char const*)globalAddressString);
+
+  // Put the EUI64 in the JSON
+  strncpy(jsonString + strSz, (char const*)euiKey, sizeof(jsonString) - strSz);
+  strSz += strlen((char const*)euiKey);
+  strncpy(jsonString + strSz, (char const*)euiString, sizeof(jsonString) - strSz);
+  strSz += strlen((char const*)euiString);
+
+  // Put the macExtendedID in the JSON
+    strncpy(jsonString + strSz, (char const*)maxExtIDKey, sizeof(jsonString) - strSz);
+    strSz += strlen((char const*)maxExtIDKey);
+    strncpy(jsonString + strSz, (char const*)exiString, sizeof(jsonString) - strSz);
+    strSz += strlen((char const*)exiString);
+
+  strncpy(jsonString + strSz, (char const*)jsonClose, sizeof(jsonString) - strSz);
+  strSz += strlen((char const*)jsonClose);
+
+  // Use defaults
+  EmberCoapSendInfo info = { 0 };
+  status = emberCoapPost(&discoverRequestAddress,
+                         deviceAnnounceUri,
+                         (uint8_t const*)jsonString,
+                         strlen(jsonString),
+                         NULL, // handler
+                         &info);
+  if (status != EMBER_SUCCESS) {
+    emberAfCorePrintln("ERR: Discovery announcement failed: 0x%x", status);
+  }
+}
+
+void subscribeHandler(EmberCoapCode code,
+                      uint8_t *uri,
+                      EmberCoapReadOptions *options,
+                      const uint8_t *payload,
+                      uint16_t payloadLength,
+                      const EmberCoapRequestInfo *info)
+{
+  EmberCoapCode responseCode;
+  EmberIpv6Address addressOfSubscriber = { { 0 } };
+  const EmberIpv6Address *newSubscriberAddress = &info->remoteAddress;
+  int rc = 0;
+  char* ipAddressKey;
+  char ipAddressValue[64] = { 0 };
+  int ipAddressValueSize = 0;
+  char* portKey;
+  uint16_t portValue = EMBER_COAP_PORT;
+
+  // Check the payload to see if it wants us to subscribe to a remote address
+  if (payload) {
+    // Split JSON payload into key + value pairs
+    //"{\"ip\":\"0000:0000:0000:0000:0000:0000:0000:0000\",\"port\":\"00000\"}\0";
+
+    // Locate the address of the keys in the payload
+    ipAddressKey = strstr((char const*)payload, IP_JSON_KEY);
+    if (ipAddressKey != NULL) {
+      rc = sscanf(ipAddressKey,
+                  "%*[^:]:\"%[^\"]\"%n,",
+                  ipAddressValue,
+                  &ipAddressValueSize);
+      if (rc == 1) {
+        emberAfCorePrintln("Parsed JSON IP Address: \"%s\"", ipAddressValue);
+
+        if (!emberIpv6StringToAddress((const uint8_t *)ipAddressValue,
+                                      &addressOfSubscriber) ) {
+          emberAfCorePrintln("Failed to read malformed subscriber address: %s",
+                             ipAddressValue);
+          // newSubscriberAddress is initialized to info->remoteAddress. If
+          // payload was malformatted we automatically failover to the source
+          // address of the request packet
+        } else {
+          newSubscriberAddress = &addressOfSubscriber;
+        }
+      } else {
+        // If the address is malformatted, clear our local variable to denote
+        // the error
+        emberAfCorePrintln("Failed to read malformed IP Address (rc=%d", rc);
+        ipAddressValue[0] = '\0';
+      }
+    }
+    portKey = strstr((const char*)payload, PORT_JSON_KEY);
+    if (portKey != NULL) {
+      rc = sscanf(portKey, "%*[^:]:%hu[^\",}]", &portValue);
+      if (rc == 1) {
+        emberAfCorePrintln("Parsed JSON Port: %d", portValue);
+      } else {
+        emberAfCorePrintln("Failed to read malformed subscriber port (rc=%d)",
+                           rc);
+        portValue = EMBER_COAP_PORT;
+      }
+    }
+  }
+
+  if (state == WAIT_FOR_SUBSCRIPTIONS) {
+    startReportingTemperature(newSubscriberAddress, portValue);
+    responseCode = EMBER_COAP_CODE_204_CHANGED;
+  } else {
+    responseCode = EMBER_COAP_CODE_503_SERVICE_UNAVAILABLE;
+  }
+
+  emberCoapRespondWithCode(info, responseCode);
+}
+
+static void startReportingTemperature(const EmberIpv6Address *newSubscriberAddress,
+                                      uint16_t newSubscriberPort)
+{
+  assert(state == WAIT_FOR_SUBSCRIPTIONS);
+
+  MEMCOPY(&subscriberAddress, newSubscriberAddress, sizeof(EmberIpv6Address));
+  subscriberPort = newSubscriberPort;
+  failedReports = 0;
+
+  emberAfCorePrint("Starting reporting to subscriber at [");
+  emberAfCoreDebugExec(emberAfPrintIpv6Address(&subscriberAddress));
+  emberAfCorePrintln("]:(%d)", subscriberPort);
+
+  setNextState(REPORT_TEMP_TO_SUBSCRIBER);
+}
+static void stopReportingTemperature(void)
+{
+  // We stop reporting temperature in response to failed reports (or a CLI
+  // command). Once we detach, we wait for a new subscriber.
+
+  assert(state == REPORT_TEMP_TO_SUBSCRIBER
+         || state == WAIT_FOR_DATA_CONFIRMATION);
+
+  emberAfCorePrintln("Stopped reporting to subscriber");
+
+  setNextState(WAIT_FOR_SUBSCRIPTIONS);
+}
+
 
 void buzzerHandler(EmberCoapCode code,
                    uint8_t *uri,
@@ -441,6 +716,35 @@ static uint32_t readTemperature(void)
   return temperatureMC;
 }
 
+static void reportTemperatureStatusHandler(EmberCoapStatus status,
+                                           EmberCoapCode code,
+                                           EmberCoapReadOptions *options,
+                                           uint8_t *payload,
+                                           uint16_t payloadLength,
+                                           EmberCoapResponseInfo *info)
+{
+  // We track the success or failure of reports so that we can determine when
+  // we have lost the subscriber.  A series of consecutive failures is the
+  // trigger to detach from the current subscriber and find a new one.  Any
+  // successfully-transmitted report clears past failures.
+
+  if (state == WAIT_FOR_DATA_CONFIRMATION) {
+    if (status == EMBER_COAP_MESSAGE_ACKED) {
+      failedReports = 0;
+    } else {
+      failedReports++;
+      emberAfCorePrintln("ERR: Report timed out - failure %u of %u",
+                         failedReports,
+                         REPORT_FAILURE_LIMIT);
+    }
+    if (failedReports < REPORT_FAILURE_LIMIT) {
+      setNextStateWithDelay(REPORT_TEMP_TO_SUBSCRIBER, REPORT_PERIOD_MS);
+    } else {
+      stopReportingTemperature();
+    }
+  }
+}
+
 void netResetHandler(EmberCoapCode code,
                      uint8_t *uri,
                      EmberCoapReadOptions *options,
@@ -453,7 +757,7 @@ void netResetHandler(EmberCoapCode code,
   emberConnectionManagerLeaveNetwork();
 }
 
-
+#if FALSE
 void emberButtonPressIsr(uint8_t button, EmberButtonPress press)
 {
   // Workaround for em3588 to filter spurious button interrupts seen on cold
@@ -523,7 +827,9 @@ void emberButtonPressIsr(uint8_t button, EmberButtonPress press)
       break;
   }
   ;
+
 }
+#endif
 
 void emberUdpHandler(const uint8_t *destination,
                      const uint8_t *source,
@@ -546,9 +852,15 @@ bool emberAfPluginIdleSleepOkToSleepCallback(uint32_t durationMs)
   // are a router.  Before we join, we would could sleep, but we prevent that
   // by returning false here.
 
-  return false;
+#ifdef BADGE_DEVICE  //smart tag device
+	  return true;
+#else 					//smart relay device
+	  return false;
+#endif
+
 }
 
+//TODO: need to update for subscriber mechanism from rftagid project
 void stateEventHandler(void)
 {
   emberEventControlSetInactive(stateEventControl);
@@ -590,6 +902,175 @@ static void formatEuiString(uint8_t* euiString, size_t strSz, const uint8_t* eui
   }
 }
 
+// Helper function used to specify source/destination port
+static EmberStatus coapSendUri(EmberCoapCode code,
+                               const EmberIpv6Address *destination,
+                               const uint16_t destinationPort,
+                               const uint16_t sourcePort,
+                               const uint8_t *uri,
+                               const uint8_t *body,
+                               uint16_t bodyLength,
+                               EmberCoapResponseHandler responseHandler)
+{
+  // Use defaults for everything except the ports.
+  EmberCoapSendInfo info = {
+    .localPort = sourcePort,
+    .remotePort = destinationPort,
+  };
+  return emberCoapSend(destination,
+                       code,
+                       uri,
+                       body,
+                       bodyLength,
+                       responseHandler,
+                       &info);
+}
+
+//vlad
+static void startScanAir() {
+	emberAfCorePrintln("startScanAir");
+	initDataBeforeScan();
+
+}
+//vlad TOP3 it just a terminology introduced by GLENN WEST
+int top3Compare(const void *s1, const void *s2) {
+	RutledgeScanData *e1 = (RutledgeScanData *) s1;
+	RutledgeScanData *e2 = (RutledgeScanData *) s2;
+	return e2->rssi - e1->rssi;
+}
+
+void sendAir(uint8_t status) {
+	/*for (int i = 0 ; i <scanCounter; i++)
+	 {
+	 RutledgeScanData * tmp;
+	 tmp = scanData+i;
+	 emberAfCorePrintln("%d: 0x%4x ", i, tmp);
+	 emberAfCorePrint("long id: ");
+	 emberAfCoreDebugExec(emberAfPrintExtendedPanId(tmp->longId));
+	 emberAfCorePrintln("");
+	 emberAfCorePrintln("rssi: %d dBm", tmp->rssi);
+
+	 }*/
+	bool isNeededToSend = false;
+	scanCounter = MIN(MAX_TOP_DEVICES, scanCounter);
+	emberAfCorePrintln("\tscanCounter: %d ", scanCounter);
+	qsort(scanData, scanCounter, sizeof(RutledgeScanData), top3Compare);
+	uint8_t  i, j, totalCompared = 0;
+	float maxRssi, minRssi;
+	char tempS[32] = { 0 }, tempT[32] = { 0 };
+	RutledgeScanData * tmpS;
+	RutledgeScanData * tmpT;
+	for (i = 0; i < scanCounter && !isNeededToSend; i++) {
+		tmpS = scanData+i;
+		formatEuiString(tempS, sizeof(exiString), tmpS->longId);
+		emberAfCorePrint("\t\t[-]::tmpS->longId: %s compare with ", tempS);
+		//for (j = 0; j < scanCounter && !isNeededToSend; j++) {
+			tmpT = top3Data+i;
+			formatEuiString(tempT, sizeof(exiString), tmpT->longId);
+			emberAfCorePrintln(" [-]::tmpT->longId: %s ", tempT);
+			if (strcmp(tempS, tempT) == 0) {
+
+				maxRssi = (float)MAX(tmpS->rssi, tmpT->rssi);
+				minRssi = (float)MIN(tmpS->rssi, tmpT->rssi);
+				/*emberAfCorePrintln("maxRssi: %d ", (int)maxRssi);
+				emberAfCorePrintln("minRssi: %d ", (int)minRssi);
+				emberAfCorePrintln("maxRssi: %d ", (int)(maxRssi*(100+COMPARE_DEVIATION_PERCENT) / 100));
+				emberAfCorePrintln("minRssi: %d ", (int)(minRssi*(100+COMPARE_DEVIATION_PERCENT) / 100));*/
+				if (abs(minRssi-maxRssi)
+						> abs(maxRssi*COMPARE_DEVIATION_PERCENT / 100)) {
+
+				}
+			}else{
+				isNeededToSend = true;
+									break;
+			}
+			totalCompared++;
+		//}
+	}
+	emberAfCorePrintln("totalCompared: %d , isNeededToSend %d", totalCompared, isNeededToSend);
+	if (isNeededToSend || totalCompared!=scanCounter) {
+		MEMCOPY(top3Data, scanData,
+		MAX_TOP_DEVICES * sizeof(RutledgeScanData));
+		char tempString[32] = { 0 };
+		char tempString2[37] = { 0 };
+		// NULL JSON that returns the temp and ID of the device
+		char jsonString[512] =
+				"{\"ID\":\"0000000000000000\",\"rssi\":\"0\"}";
+		char deviceKey[] = "\",\"d%d\":\"";
+		char rssiKey[] = "\",\"r%d\":\"";
+		char jsonClose[] = "\"}";
+		uint8_t strSz = strlen("{\"ID\":\"");
+		strncpy(jsonString + strSz, (char const*) exiString,
+				sizeof(jsonString) - strSz);
+		strSz += strlen((char const*) exiString);
+		EPD_W21_POWERPIN_HIGH();
+		for (i = 0; i < scanCounter; i++) {
+			tmpS = scanData + i;
+			///emberAfCorePrintln("%d: 0x%4x ", i, tmp);
+			/*emberAfCorePrint("long id: ");
+			 emberAfCoreDebugExec(emberAfPrintExtendedPanId(tmp->longId));
+			 emberAfCorePrintln("");
+			 emberAfCorePrintln("rssi: %d dBm", tmp->rssi);*/
+			// Put the temp in JSON, for the end of the string
+			sprintf(tempString, deviceKey, i);
+
+			//sprintf(tempString, "%s", tmp->longId);
+			strncpy(jsonString + strSz, (char const*) tempString,
+					sizeof(jsonString) - strSz);
+			strSz += strlen((char const*) tempString);
+			formatEuiString(tempString, sizeof(exiString), tmpS->longId);
+
+			if (!i) {
+				sprintf(tempString2, "EXM:%s|EUI:%s",
+						(char const*) exiString, (char const*) euiString);
+				EPD_DisplayScanInfo(i, tempString2);
+
+			}
+				sprintf(tempString2, "TOP%d:[%s][%d]",
+										 i+1,(char const*) tempString, tmpS->rssi);
+
+
+
+			strncpy(jsonString + strSz, (char const*) tempString,
+					sizeof(jsonString) - strSz);
+			strSz += strlen((char const*) tempString);
+			sprintf(tempString, rssiKey, i);
+			strncpy(jsonString + strSz, (char const*) tempString,
+					sizeof(jsonString) - strSz);
+			strSz += strlen((char const*) tempString);
+
+			sprintf(tempString, "%d", tmpS->rssi);
+			strncpy(jsonString + strSz, (char const*) tempString,
+					sizeof(jsonString) - strSz);
+			strSz += strlen((char const*) tempString);
+			EPD_DisplayScanInfo(i+1, tempString2);
+			MEMSET(tempString,0, sizeof(tempString));
+			MEMSET(tempString2,0, sizeof(tempString2));
+		}
+		EPD_UpdateDisplay();
+		EPD_W21_POWERPIN_LOW();
+		strncpy(jsonString + strSz, (char const*) jsonClose,
+				sizeof(jsonString) - strSz);
+		strSz += strlen((char const*) jsonClose);
+
+		status = coapSendUri(EMBER_COAP_CODE_POST, &subscriberAddress,
+				subscriberPort, //dport
+				EMBER_COAP_PORT, //sport
+				temperatureUri, (uint8_t const*) jsonString, strlen(jsonString),
+				&reportTemperatureStatusHandler);
+
+		if (status == EMBER_SUCCESS) {
+			setNextState(WAIT_FOR_DATA_CONFIRMATION);
+		} else {
+			emberAfCorePrintln("ERR: Reporting failed: 0x%x", status);
+			repeatStateWithDelay(REPORT_PERIOD_MS);
+		}
+	} else {
+		setNextStateWithDelay(REPORT_TEMP_TO_SUBSCRIBER, REPORT_PERIOD_MS);
+	}
+}
+
+
 #if defined(EMBER_AF_PLUGIN_GLIB) && defined(CORTEXM3_EFM32_MICRO)
 static char* nodeTypeToString(EmberNodeType nodeType)
 {
@@ -627,6 +1108,16 @@ static char* nodeTypeToString(EmberNodeType nodeType)
 void updateDisplayEventHandler(void)
 {
   emberEventControlSetInactive(updateDisplayEventControl);
+#if true
+
+  emberAfCorePrintln("Testing ABCDEFGHIJKLMNOPQRSTX");
+
+  emberEventControlSetDelayMS(updateDisplayEventControl, REPORT_PERIOD_MS);
+
+
+#endif
+
+
 #if defined(EMBER_AF_PLUGIN_GLIB) && defined(CORTEXM3_EFM32_MICRO)
   EmberNetworkStatus networkStatus;
 
@@ -831,3 +1322,20 @@ void lcdPrintIpv6Address(const EmberIpv6Address *address,
 }
 
 #endif //EMBER_AF_PLUGIN_GLIB
+
+/* revision history
+DATE(dd/mm/yy) AUTHOR description
+06/02/18  tgbl
+
+ TODO: porting the subscribe/broadcast mechanism from rftagid project
+ waitForSubscriptions
+ subscribeHandler
+ startReportTemperature
+ staeeventhandler fomr rftagid- leverage fomr connection manager?
+  susbscriber boracast
+  stopreportcommand
+  stopreportingtemperature
+  reportTemperatureStatusHandler using coap messaging for subscriber mechanism
+  reportTemperature
+*/
+

@@ -29,9 +29,6 @@ extern EmberEventControl emConnectionManagerOrphanEventControl;
 void emConnectionManagerOkToLongPollHandler(void);
 extern EmberEventControl emConnectionManagerOkToLongPollEventControl;
 
-void emberAfPluginHeartbeatNodeTypeEventHandler(void);
-extern EmberEventControl emberAfPluginHeartbeatNodeTypeEventControl;
-
 void emZclIdentifyServerEventHandler(void);
 extern EmberEventControl emZclIdentifyServerEventControl;
 
@@ -44,12 +41,6 @@ extern EmberEventControl emZclOtaBootloadStorageEepromEraseEventControl;
 void emZclEzModeEventHandler(void);
 extern EmberEventControl emZclEzModeEventControl;
 
-void emberAfPluginButton0EventHandler(void);
-extern EmberEventControl emberAfPluginButton0EventControl;
-
-void emberAfPluginButton1EventHandler(void);
-extern EmberEventControl emberAfPluginButton1EventControl;
-
 
 
 const EmberEventData emAppEvents[] = {
@@ -60,12 +51,9 @@ const EmberEventData emAppEvents[] = {
   {&emConnectionManagerNetworkStateEventControl, emConnectionManagerNetworkStateEventHandler},
   {&emConnectionManagerOrphanEventControl, emConnectionManagerOrphanEventHandler},
   {&emConnectionManagerOkToLongPollEventControl, emConnectionManagerOkToLongPollHandler},
-  {&emberAfPluginHeartbeatNodeTypeEventControl, emberAfPluginHeartbeatNodeTypeEventHandler},
   {&emZclIdentifyServerEventControl, emZclIdentifyServerEventHandler},
   {&emZclOtaBootloadClientEventControl, emZclOtaBootloadClientEventHandler},
   {&emZclOtaBootloadStorageEepromEraseEventControl, emZclOtaBootloadStorageEepromEraseEventHandler},
   {&emZclEzModeEventControl, emZclEzModeEventHandler},
-  {&emberAfPluginButton0EventControl, emberAfPluginButton0EventHandler},
-  {&emberAfPluginButton1EventControl, emberAfPluginButton1EventHandler},
   {NULL, NULL}
 };

@@ -9,7 +9,6 @@
 
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
-#include EMBER_AF_API_BUTTON_PRESS
 #include EMBER_AF_API_CONNECTION_MANAGER_JIB
 #include EMBER_AF_API_CONNECTION_MANAGER
 #include EMBER_AF_API_STACK
@@ -27,37 +26,6 @@
  * must implement this function.
  */
 int main(MAIN_FUNCTION_PARAMETERS);
-
-/** @brief A callback called in interrupt context whenever a button
- * changes its state.
- *
- * @appusage Must be implemented by the application.  This function should
- * contain the functionality to be executed in response to changes of state
- * in each of the buttons, or callbacks to the appropriate functionality.
- *
- * @param button  The button which has changed state, either BUTTON0 or BUTTON1
- * as defined in the appropriate BOARD_HEADER.
- *
- * @param state   The new state of the button referenced by the button parameter,
- * either ::BUTTON_PRESSED if the button has been pressed or ::BUTTON_RELEASED if
- * the button has been released.
- */
-void halButtonIsr(uint8_t button, uint8_t state);
-
-/** @brief A callback called when a button is pressed. It is sometimes called
- * in ISR context.
- *
- * @appusage Must be implemented by the application.  This function should
- * contain the functionality to be executed in response to a button press, or
- * callbacks to the appropriate functionality.
- *
- * @param button  The button which was pressed, either BUTTON0 or BUTTON1
- * as defined in the appropriate BOARD_HEADER.
- *
- * @param press  Either EMBER_SINGLE_PRESS if it was a single press, or
- * EMBER_DOUBLE_PRESS if it was a double press.
- */
-void emberButtonPressIsr(uint8_t button, EmberButtonPress press);
 
 /** @brief Get the fixed joining key
  *
@@ -110,6 +78,44 @@ void emberZclIdentifyServerStartIdentifyingCallback(EmberZclEndpointId_t endpoin
  * This function is called when the device should stop identifying.
  */
 void emberZclIdentifyServerStopIdentifyingCallback(EmberZclEndpointId_t endpointId);
+
+/** @brief Ok To Sleep
+ *
+ * This function is called by the Idle/Sleep plugin before sleeping.  It is
+ * called with interrupts disabled.  The application should return true if the
+ * device may sleep or false otherwise.
+ *
+ * @param durationMs The maximum duration in milliseconds that the device will
+ * sleep.
+ */
+bool emberAfPluginIdleSleepOkToSleepCallback(uint32_t durationMs);
+
+/** @brief Wake Up
+ *
+ * This function is called by the Idle/Sleep plugin after sleeping.
+ *
+ * @param durationMs The duration in milliseconds that the device slept.
+ */
+void emberAfPluginIdleSleepWakeUpCallback(uint32_t durationMs);
+
+/** @brief Ok To Idle
+ *
+ * This function is called by the Idle/Sleep plugin before idling.  It is called
+ * with interrupts disabled.  The application should return true if the device
+ * may idle or false otherwise.
+ *
+ * @param durationMs The maximum duration in milliseconds that the device will
+ * idle.
+ */
+bool emberAfPluginIdleSleepOkToIdleCallback(uint32_t durationMs);
+
+/** @brief Active
+ *
+ * This function is called by the Idle/Sleep plugin after idling.
+ *
+ * @param durationMs The duration in milliseconds that the device idled.
+ */
+void emberAfPluginIdleSleepActiveCallback(uint32_t durationMs);
 
 /** @brief Mark Application Buffers
  *

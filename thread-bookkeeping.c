@@ -7,6 +7,38 @@
 #include EMBER_AF_API_STACK
 #include EMBER_AF_API_ZCL_CORE
 
+// OkToSleep function declarations.
+bool emberAfPluginIdleSleepOkToSleepCallback(uint32_t durationMs);
+
+bool emberAfOkToSleep(uint32_t durationMs)
+{
+  return emberAfPluginIdleSleepOkToSleepCallback(durationMs);
+}
+
+// WakeUp function declarations.
+void emberAfPluginIdleSleepWakeUpCallback(uint32_t durationMs);
+
+void emberAfPluginIdleSleepWakeUp(uint32_t durationMs)
+{
+  emberAfPluginIdleSleepWakeUpCallback(durationMs);
+}
+
+// OkToIdle function declarations.
+bool emberAfPluginIdleSleepOkToIdleCallback(uint32_t durationMs);
+
+bool emberAfOkToIdle(uint32_t durationMs)
+{
+  return emberAfPluginIdleSleepOkToIdleCallback(durationMs);
+}
+
+// Active function declarations.
+void emberAfPluginIdleSleepActiveCallback(uint32_t durationMs);
+
+void emberAfPluginIdleSleepActive(uint32_t durationMs)
+{
+  emberAfPluginIdleSleepActiveCallback(durationMs);
+}
+
 // Main function declarations.
 void emberAfMainCallback(MAIN_FUNCTION_PARAMETERS);
 
@@ -19,7 +51,6 @@ void emAfMain(MAIN_FUNCTION_PARAMETERS)
 void emberAfInitCallback(void);
 void emberCommandReaderInit(void);
 void emberAfPluginEepromInitCallback(void);
-void emberAfPluginHeartbeatNodeTypeInit(void);
 void emZclOtaBootloadClientInitCallback(void);
 void emZclOtaBootloadStorageEepromInitCallback(void);
 void emZclInitHandler(void);
@@ -29,7 +60,6 @@ void emAfInit(void)
   emberAfInitCallback();
   emberCommandReaderInit();
   emberAfPluginEepromInitCallback();
-  emberAfPluginHeartbeatNodeTypeInit();
   emZclOtaBootloadClientInitCallback();
   emZclOtaBootloadStorageEepromInitCallback();
   emZclInitHandler();
@@ -39,6 +69,7 @@ void emAfInit(void)
 void emberTick(void);
 void emberAfTickCallback(void);
 void emberAfPluginCliTickCallback(void);
+void emberAfPluginIdleSleepTickCallback(void);
 void emberSerialBufferTick(void);
 
 void emAfTick(void)
@@ -46,6 +77,7 @@ void emAfTick(void)
   emberTick();
   emberAfTickCallback();
   emberAfPluginCliTickCallback();
+  emberAfPluginIdleSleepTickCallback();
   emberSerialBufferTick();
 }
 

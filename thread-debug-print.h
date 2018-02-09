@@ -103,44 +103,6 @@
 #endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_BASIC_SERVER)
 
 
-// Generated functions for use within plugin Button
-#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_BUTTON)
-#define emberAfPluginButtonPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_BUTTON, __VA_ARGS__)
-#define emberAfPluginButtonPrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_BUTTON,  __VA_ARGS__)
-// Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
-#define emberAfPluginButtonFlush()
-#define emberAfPluginButtonDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_BUTTON) ) { x; }
-#define emberAfPluginButtonPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_BUTTON, (buffer), (len), (withSpace))
-#define emberAfPluginButtonPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_BUTTON, (buffer))
-#else
-#define emberAfPluginButtonPrint(...)
-#define emberAfPluginButtonPrintln(...)
-#define emberAfPluginButtonFlush()
-#define emberAfPluginButtonDebugExec(x)
-#define emberAfPluginButtonPrintBuffer(buffer, len, withSpace)
-#define emberAfPluginButtonPrintString(buffer)
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_BUTTON)
-
-
-// Generated functions for use within plugin Button-Press
-#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS)
-#define emberAfPluginButtonPressPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS, __VA_ARGS__)
-#define emberAfPluginButtonPressPrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS,  __VA_ARGS__)
-// Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
-#define emberAfPluginButtonPressFlush()
-#define emberAfPluginButtonPressDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS) ) { x; }
-#define emberAfPluginButtonPressPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS, (buffer), (len), (withSpace))
-#define emberAfPluginButtonPressPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS, (buffer))
-#else
-#define emberAfPluginButtonPressPrint(...)
-#define emberAfPluginButtonPressPrintln(...)
-#define emberAfPluginButtonPressFlush()
-#define emberAfPluginButtonPressDebugExec(x)
-#define emberAfPluginButtonPressPrintBuffer(buffer, len, withSpace)
-#define emberAfPluginButtonPressPrintString(buffer)
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_BUTTON_PRESS)
-
-
 // Generated functions for use within plugin CLI
 #if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_CLI)
 #define emberAfPluginCliPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_CLI, __VA_ARGS__)
@@ -407,25 +369,6 @@
 #endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_HAL_LIBRARY)
 
 
-// Generated functions for use within plugin Heartbeat (Node Type)
-#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE)
-#define emberAfPluginHeartbeatNodeTypePrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE, __VA_ARGS__)
-#define emberAfPluginHeartbeatNodeTypePrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE,  __VA_ARGS__)
-// Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
-#define emberAfPluginHeartbeatNodeTypeFlush()
-#define emberAfPluginHeartbeatNodeTypeDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE) ) { x; }
-#define emberAfPluginHeartbeatNodeTypePrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE, (buffer), (len), (withSpace))
-#define emberAfPluginHeartbeatNodeTypePrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE, (buffer))
-#else
-#define emberAfPluginHeartbeatNodeTypePrint(...)
-#define emberAfPluginHeartbeatNodeTypePrintln(...)
-#define emberAfPluginHeartbeatNodeTypeFlush()
-#define emberAfPluginHeartbeatNodeTypeDebugExec(x)
-#define emberAfPluginHeartbeatNodeTypePrintBuffer(buffer, len, withSpace)
-#define emberAfPluginHeartbeatNodeTypePrintString(buffer)
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_HEARTBEAT_NODE_TYPE)
-
-
 // Generated functions for use within plugin ICMP CLI
 #if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_ICMP_CLI)
 #define emberAfPluginIcmpCliPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_ICMP_CLI, __VA_ARGS__)
@@ -483,23 +426,23 @@
 #endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_IDENTIFY_SERVER)
 
 
-// Generated functions for use within plugin LED
-#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_LED)
-#define emberAfPluginLedPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_LED, __VA_ARGS__)
-#define emberAfPluginLedPrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_LED,  __VA_ARGS__)
+// Generated functions for use within plugin Idle/Sleep
+#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP)
+#define emberAfPluginIdleSleepPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP, __VA_ARGS__)
+#define emberAfPluginIdleSleepPrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP,  __VA_ARGS__)
 // Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
-#define emberAfPluginLedFlush()
-#define emberAfPluginLedDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_LED) ) { x; }
-#define emberAfPluginLedPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_LED, (buffer), (len), (withSpace))
-#define emberAfPluginLedPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_LED, (buffer))
+#define emberAfPluginIdleSleepFlush()
+#define emberAfPluginIdleSleepDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP) ) { x; }
+#define emberAfPluginIdleSleepPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP, (buffer), (len), (withSpace))
+#define emberAfPluginIdleSleepPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP, (buffer))
 #else
-#define emberAfPluginLedPrint(...)
-#define emberAfPluginLedPrintln(...)
-#define emberAfPluginLedFlush()
-#define emberAfPluginLedDebugExec(x)
-#define emberAfPluginLedPrintBuffer(buffer, len, withSpace)
-#define emberAfPluginLedPrintString(buffer)
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_LED)
+#define emberAfPluginIdleSleepPrint(...)
+#define emberAfPluginIdleSleepPrintln(...)
+#define emberAfPluginIdleSleepFlush()
+#define emberAfPluginIdleSleepDebugExec(x)
+#define emberAfPluginIdleSleepPrintBuffer(buffer, len, withSpace)
+#define emberAfPluginIdleSleepPrintString(buffer)
+#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_IDLE_SLEEP)
 
 
 // Generated functions for use within plugin Main
@@ -709,6 +652,25 @@
 #define emberAfPluginRailLibraryPrintBuffer(buffer, len, withSpace)
 #define emberAfPluginRailLibraryPrintString(buffer)
 #endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_RAIL_LIBRARY)
+
+
+// Generated functions for use within plugin Scan Debug
+#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG)
+#define emberAfPluginScanDebugPrint(...) emberAfPrint(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG, __VA_ARGS__)
+#define emberAfPluginScanDebugPrintln(...) emberAfPrintln(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG,  __VA_ARGS__)
+// Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
+#define emberAfPluginScanDebugFlush()
+#define emberAfPluginScanDebugDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG) ) { x; }
+#define emberAfPluginScanDebugPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG, (buffer), (len), (withSpace))
+#define emberAfPluginScanDebugPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG, (buffer))
+#else
+#define emberAfPluginScanDebugPrint(...)
+#define emberAfPluginScanDebugPrintln(...)
+#define emberAfPluginScanDebugFlush()
+#define emberAfPluginScanDebugDebugExec(x)
+#define emberAfPluginScanDebugPrintBuffer(buffer, len, withSpace)
+#define emberAfPluginScanDebugPrintString(buffer)
+#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PLUGIN_SCAN_DEBUG)
 
 
 // Generated functions for use within plugin Serial
