@@ -57,6 +57,23 @@ uint32_t timeDisconnected = 0; //duration network is down
 uint32_t timeDisconnected_start = 0; //capture the first time when disconected event happen
 uint32_t timeConnected_start = 0;     // current connected duration
 
+static bool cnctMgrFlag = false; //flag indicator to know if callback is triggered from connection manager cli cmd
+
+bool isFromCnctMgr(void)
+{
+  return(cnctMgrFlag);
+}
+
+void cnctMgrFlagSet(void)
+{
+  cnctMgrFlag = true;
+}
+
+void cnctMgrFlagClear(void)
+{
+  cnctMgrFlag = false;
+}
+
 void emberConnectionManagerStartConnect(void)
 {
   // This function will attempt to rejoin a network in all cases, if it is
@@ -79,7 +96,7 @@ void emberConnectionManagerStartConnect(void)
       joinKeyLength = emberConnectionManagerJibGetJoinKeyCallback(&joinKey);
 
       if (joinKeyLength == 0) {
-        emberAfCorePrintln("No join key set!");
+        emberAfCorePrintln("Cnct Mgr : No join key set!");
         emberConnectionManagerConnectCompleteCallback(EMBER_CONNECTION_MANAGER_STATUS_NO_KEY);
         return;
       }
@@ -119,11 +136,11 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
   switch (newNetworkStatus) {
     case EMBER_NO_NETWORK:
       if (oldNetworkStatus == EMBER_JOINING_NETWORK) {
-        emberAfCorePrintln("ERR: Joining failed: 0x%x", reason);
+        emberAfCorePrintln("Cnct Mgr ERR: Joining failed: 0x%x", reason);
 
         disconnectedCnt++;
-	  
-	  	//Capture first instance 
+
+	  	//Capture first instance
 		if (timeDisconnected_start == 0)
 		{
 		 	timeDisconnected_start = RTCDRV_GetWallClock();
@@ -138,7 +155,7 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
 			{
 				emberAfCorePrintln("Was connected for %d seconds. Longest time recorded: %d seconds.",timeConnected, timeConnectedMax);
 				timeConnected_start = 0;
-	      	} 
+	      	}
 			else
 			{
 				emberAfCorePrintln("Was connected for %d mins and %d secs. Longest time recorded: %d seconds.",(timeConnected/60), (timeConnected%60), timeConnectedMax);
@@ -157,13 +174,13 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
     case EMBER_JOINED_NETWORK_ATTACHING:
       // Wait for the "attached" state.
       if (oldNetworkStatus == EMBER_JOINED_NETWORK_ATTACHED) {
-        emberAfCorePrintln("Trying to re-connect...");
+        emberAfCorePrintln("Cnct Mgr: Trying to re-connect...");
         isOrphaned = true;
         wasOrphaned = true;
       }
       break;
     case EMBER_JOINED_NETWORK_ATTACHED:
-      emberAfCorePrintln("Connected to network: %s",
+      emberAfCorePrintln("Cnct Mgr: Connected to network: %s",
                          (state == RESUME_NETWORK
                           ? "Resumed"
                           : (state == JOIN_NETWORK
@@ -181,12 +198,12 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
       	timeDisconnected = RTCDRV_GetWallClock() - timeDisconnected_start;
 		if (timeDisconnected < 60)
 		{
-			emberAfCorePrintln("Disconnected for %d seconds.\nOccurrences: %d time(s)",timeDisconnected, disconnectedCnt);
+			emberAfCorePrintln("Cnct Mgr: Disconnected for %d seconds.\nOccurrences: %d time(s)",timeDisconnected, disconnectedCnt);
 			timeDisconnected_start = 0;
-      	} 
+      	}
 		else
 		{
-			emberAfCorePrintln("Disconnected for %d mins and %d secs.\nOccurrences: %d time(s)",(timeDisconnected/60), (timeDisconnected%60), disconnectedCnt);
+			emberAfCorePrintln("Cnct Mgr: Disconnected for %d mins and %d secs.\nOccurrences: %d time(s)",(timeDisconnected/60), (timeDisconnected%60), disconnectedCnt);
 			timeDisconnected_start = 0;
       	}
 
@@ -194,13 +211,13 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
 
 	  timeConnected_start = RTCDRV_GetWallClock();
 
-      
+
       break;
     case EMBER_JOINED_NETWORK_NO_PARENT:
       if (wasOrphaned) {
         emberEventControlSetDelayMinutes(emConnectionManagerOrphanEventControl,
                                          EMBER_AF_PLUGIN_CONNECTION_MANAGER_JIB_ORPHAN_REJOIN_DELAY_MINUTES);
-        emberAfCorePrintln("Retrying join in %d minutes\n",
+        emberAfCorePrintln("Cnct Mgr: Retrying join in %d minutes\n",
                            EMBER_AF_PLUGIN_CONNECTION_MANAGER_JIB_ORPHAN_REJOIN_DELAY_MINUTES);
 
 		disconnectedCnt++;
@@ -218,7 +235,7 @@ void emConnectionManagerJibNetworkStatusHandler(EmberNetworkStatus newNetworkSta
 
 void emConnectionManagerOkToLongPollHandler(void)
 {
-  emberAfCorePrintln("%dms has passed, now OK to long poll",
+  emberAfCorePrintln("Cnct Mgr: %dms has passed, now OK to long poll",
                      TIME_TO_WAIT_FOR_LONG_POLLING_MS);
   emberEventControlSetInactive(emConnectionManagerOkToLongPollEventControl);
   okToLongPoll = true;
@@ -252,7 +269,7 @@ void emConnectionManagerOrphanEventHandler(void)
 {
   emberEventControlSetInactive(emConnectionManagerOrphanEventControl);
   isOrphaned = true;
-  emberAfCorePrintln("Device still orphaned, attempt to reattach");
+  emberAfCorePrintln("Cnct Mgr: Device still orphaned, attempt to reattach");
   emberAttachToNetwork();
 }
 
@@ -274,7 +291,7 @@ void emberConnectionManagerLeaveNetwork(void)
 
 static void resumeNetwork(void)
 {
-  emberAfCorePrintln("Resuming...");
+  emberAfCorePrintln("Cnct Mgr: Resuming...");
   emberResumeNetwork();
 }
 
@@ -285,7 +302,7 @@ void emberResumeNetworkReturn(EmberStatus status)
   // even attempt to resume, we are likely in an orphan state
 
   if (status != EMBER_SUCCESS) {
-    emberAfCorePrintln("ERR: Unable to resume: 0x%x", status);
+    emberAfCorePrintln("Cnct Mgr ERR: Unable to resume: 0x%x", status);
     emberAfCorePrintln("Trying again in %d minutes",
                        EMBER_AF_PLUGIN_CONNECTION_MANAGER_JIB_ORPHAN_REJOIN_DELAY_MINUTES);
     emberEventControlSetDelayMinutes(emConnectionManagerOrphanEventControl,
@@ -310,7 +327,7 @@ static void joinNetwork(void)
     joinKeyLength = emberConnectionManagerJibGetJoinKeyCallback(&joinKey);
 
     if (joinKeyLength == 0) {
-      emberAfCorePrintln("No join key set!");
+      emberAfCorePrintln("Cnct Mgr: No join key set!");
       return;
     }
   }
@@ -319,7 +336,7 @@ static void joinNetwork(void)
     // Decrement the join counter
     joinAttemptsRemaining--;
 
-    emberAfCorePrintln("Joining network using join passphrase \"%s\", join attempts left = %d",
+    emberAfCorePrintln("Cnct Mgr: Joining network using join passphrase \"%s\", join attempts left = %d",
                        joinKey,
                        joinAttemptsRemaining);
 
@@ -336,7 +353,7 @@ static void joinNetwork(void)
   } else {
     // No join attempts remain
     isSearching = false;
-    emberAfCorePrintln("Unable to join within %d attempts",
+    emberAfCorePrintln("Cnct Mgr:Unable to join within %d attempts",
                        EMBER_AF_PLUGIN_CONNECTION_MANAGER_JIB_NUM_REJOIN_ATTEMPTS);
     emberConnectionManagerConnectCompleteCallback(EMBER_CONNECTION_MANAGER_STATUS_TIMED_OUT);
   }
@@ -349,7 +366,7 @@ void emberJoinNetworkReturn(EmberStatus status)
   // we just try to join again as long as join attempts remain.
 
   if (status != EMBER_SUCCESS) {
-    emberAfCorePrintln("ERR: Unable to join: 0x%x", status);
+    emberAfCorePrintln("Cnct Mgr ERR: Unable to join: 0x%x", status);
     setNextState(JOIN_NETWORK);
   } else {
     setNextState(WAIT_FOR_JOIN_NETWORK);
@@ -364,14 +381,15 @@ void emberAttachToNetworkReturn(EmberStatus status)
   // will trigger a fresh join attempt.
 
   if (status != EMBER_SUCCESS) {
-    emberAfCorePrintln("ERR: Unable to reattach: 0x%x", status);
+    emberAfCorePrintln("Cnct Mgr ERR: Unable to reattach: 0x%x", status);
     setNextState(RESET_NETWORK_STATE);
   }
 }
 
 static void resetNetworkState(void)
 {
-  emberAfCorePrintln("Resetting...");
+  //cnctMgrFlagSet();
+  emberAfCorePrintln("Cnct Mgr: Resetting...");
   emberResetNetworkState();
 }
 
@@ -402,7 +420,7 @@ void emConnectionManagerNetworkStateEventHandler(void)
 
 static void resetOkToLongPoll(void)
 {
-  emberAfCorePrintln("Resetting OK to Long Poll");
+  emberAfCorePrintln("Cnct Mgr: Resetting OK to Long Poll");
   emberEventControlSetInactive(emConnectionManagerOkToLongPollEventControl);
   okToLongPoll = false;
 }
