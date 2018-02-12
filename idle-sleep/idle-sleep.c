@@ -72,7 +72,9 @@ void emberAfPluginIdleSleepTickCallback(void)
   // of them without risking a race condition.  Note that if we don't call
   // either, we have to enable interrupts ourselves.
   INTERRUPTS_OFF();
-  bool flag_ = okToIdleOrSleep(); //true;
+
+  bool flag_ = false;           //okToIdleOrSleep(); //true;
+
   // We can idle or sleep if some basic conditions are satisfied.  If not, we
   // stay awake and active.  Otherwise, we try to sleep or idle, in that order.
   if (flag_) {
